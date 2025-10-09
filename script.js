@@ -215,9 +215,7 @@ class AdvancedWordCloudGenerator {
         if ('actualBoundingBoxAscent' in metrics && 'actualBoundingBoxDescent' in metrics) {
             height = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
         }
-        // Add extra margin to width/height for stricter collision
-        width += 8;
-        height += 8;
+        // Do not add extra margin here; margin is controlled by the slider in checkCollision
 
         let x, y;
     const maxAttempts = 1500; // Even more attempts for denser packing
