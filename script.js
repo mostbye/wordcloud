@@ -44,6 +44,7 @@ class AdvancedWordCloudGenerator {
         const wordSpacingValue = document.getElementById('wordSpacingValue');
         wordSpacing.addEventListener('input', () => {
             wordSpacingValue.textContent = wordSpacing.value + 'px';
+            this.generateWordCloud();
         });
         
         // Real-time controls
@@ -215,7 +216,10 @@ class AdvancedWordCloudGenerator {
         if ('actualBoundingBoxAscent' in metrics && 'actualBoundingBoxDescent' in metrics) {
             height = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
         }
-        // Do not add extra margin here; margin is controlled by the slider in checkCollision
+        // Add margin from slider to width/height for visible spacing
+        const margin = parseInt(document.getElementById('wordSpacing').value) || 0;
+        width += margin;
+        height += margin;
 
         let x, y;
     const maxAttempts = 1500; // Even more attempts for denser packing
