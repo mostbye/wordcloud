@@ -216,10 +216,7 @@ class AdvancedWordCloudGenerator {
         if ('actualBoundingBoxAscent' in metrics && 'actualBoundingBoxDescent' in metrics) {
             height = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
         }
-        // Add margin from slider to width/height for visible spacing
-        const margin = parseInt(document.getElementById('wordSpacing').value) || 0;
-        width += margin;
-        height += margin;
+    // Do not add margin here; margin is only for collision check
 
         let x, y;
     const maxAttempts = 1500; // Even more attempts for denser packing
