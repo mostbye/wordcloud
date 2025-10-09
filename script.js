@@ -38,6 +38,13 @@ class AdvancedWordCloudGenerator {
         
         // File upload
         document.getElementById('fileInput').addEventListener('change', (e) => this.handleFileUpload(e));
+
+        // Word Spacing slider
+        const wordSpacing = document.getElementById('wordSpacing');
+        const wordSpacingValue = document.getElementById('wordSpacingValue');
+        wordSpacing.addEventListener('input', () => {
+            wordSpacingValue.textContent = wordSpacing.value + 'px';
+        });
         
         // Real-time controls
         document.getElementById('rotation').addEventListener('input', (e) => {
@@ -184,7 +191,8 @@ class AdvancedWordCloudGenerator {
     
     // Advanced collision detection with spatial hashing
     checkCollision(x, y, width, height) {
-    const margin = 10; // Even more padding for stricter collision
+    // Use the value from the Word Spacing slider
+    const margin = parseInt(document.getElementById('wordSpacing').value) || 0;
         
         for (const word of this.placedWords) {
             if (x - margin < word.x + word.width + margin &&
