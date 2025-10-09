@@ -184,7 +184,7 @@ class AdvancedWordCloudGenerator {
     
     // Advanced collision detection with spatial hashing
     checkCollision(x, y, width, height) {
-    const margin = 8; // More padding for stricter collision
+    const margin = 10; // Even more padding for stricter collision
         
         for (const word of this.placedWords) {
             if (x - margin < word.x + word.width + margin &&
@@ -201,8 +201,15 @@ class AdvancedWordCloudGenerator {
     placeWord(word, fontSize, color, layout) {
         this.ctx.font = `${fontSize}px ${document.getElementById('fontFamily').value}`;
         const metrics = this.ctx.measureText(word);
-        const width = metrics.width;
-        const height = fontSize;
+        // Use actual bounding box if available for more accurate collision
+        let width = metrics.width;
+        let height = fontSize;
+        if ('actualBoundingBoxAscent' in metrics && 'actualBoundingBoxDescent' in metrics) {
+            height = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+        }
+        // Add extra margin to width/height for stricter collision
+        width += 8;
+        height += 8;
 
         let x, y;
     const maxAttempts = 1500; // Even more attempts for denser packing
