@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Word Cloud Generator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚀 Advanced Word Cloud Generator</h1>
+            <p>Create stunning, interactive word clouds with animations, particle effects, and multiple export options!</p>
+        </header>
+        
+        <div class="input-section">
+            <div class="input-tabs">
+                <button class="tab-btn active" data-tab="text">📝 Text Input</button>
+                <button class="tab-btn" data-tab="url">🌐 URL Input</button>
+                <button class="tab-btn" data-tab="file">📁 File Upload</button>
+            </div>
+            
+            <div id="textTab" class="tab-content active">
+                <textarea 
+                    id="textInput" 
+                    placeholder="Enter your text here... (e.g., 'Machine learning is transforming the world of artificial intelligence. Deep learning algorithms are revolutionizing how we process data and make predictions. Neural networks are becoming more sophisticated every day.')"
+                    rows="6"
+                ></textarea>
+            </div>
+            
+            <div id="urlTab" class="tab-content">
+                <input type="url" id="urlInput" placeholder="Enter URL to extract text from... (e.g., https://example.com/article)">
+                <button id="fetchUrlBtn" class="fetch-btn">🔍 Fetch Text</button>
+                <div id="urlStatus" class="status-message"></div>
+            </div>
+            
+            <div id="fileTab" class="tab-content">
+                <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx">
+                <div id="fileStatus" class="status-message"></div>
+            </div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label for="maxWords">Max Words:</label>
+                    <input type="number" id="maxWords" value="50" min="10" max="200">
+                </div>
+                
+                <div class="control-group">
+                    <label for="minFontSize">Min Font Size:</label>
+                    <input type="number" id="minFontSize" value="12" min="8" max="50">
+                </div>
+                
+                <div class="control-group">
+                    <label for="maxFontSize">Max Font Size:</label>
+                    <input type="number" id="maxFontSize" value="60" min="20" max="120">
+                </div>
+                
+                <div class="control-group">
+                    <label for="colorScheme">Color Scheme:</label>
+                    <select id="colorScheme">
+                        <option value="rainbow">🌈 Rainbow</option>
+                        <option value="blue">💙 Blue Tones</option>
+                        <option value="green">💚 Green Tones</option>
+                        <option value="red">❤️ Red Tones</option>
+                        <option value="purple">💜 Purple Tones</option>
+                        <option value="orange">🧡 Orange Tones</option>
+                        <option value="neon">⚡ Neon Glow</option>
+                        <option value="gradient">🎨 Gradient</option>
+                        <option value="monochrome">⚫ Monochrome</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="layout">Layout:</label>
+                    <select id="layout">
+                        <option value="spiral">🌀 Spiral</option>
+                        <option value="grid">📐 Grid</option>
+                        <option value="random">🎲 Random</option>
+                        <option value="circular">⭕ Circular</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="animation">Animation:</label>
+                    <select id="animation">
+                        <option value="none">🚫 None</option>
+                        <option value="fade">✨ Fade In</option>
+                        <option value="bounce">🎾 Bounce</option>
+                        <option value="spiral">🌀 Spiral In</option>
+                        <option value="particles">✨ Particle Effect</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="fontFamily">Font Family:</label>
+                    <select id="fontFamily">
+                        <option value="Arial">Arial</option>
+                        <option value="Helvetica">Helvetica</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Georgia">Georgia</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Impact">Impact</option>
+                        <option value="Comic Sans MS">Comic Sans MS</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="rotation">Word Rotation:</label>
+                    <input type="range" id="rotation" min="0" max="90" value="0">
+                    <span id="rotationValue">0°</span>
+                </div>
+                
+                <div class="control-group">
+                    <label for="opacity">Opacity:</label>
+                    <input type="range" id="opacity" min="0.3" max="1" step="0.1" value="1">
+                    <span id="opacityValue">100%</span>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="generateBtn" class="generate-btn">
+                    <span class="btn-icon">✨</span>
+                    Generate Word Cloud
+                </button>
+                <button id="animateBtn" class="animate-btn">
+                    <span class="btn-icon">🎬</span>
+                    Animate
+                </button>
+                <button id="exportBtn" class="export-btn">
+                    <span class="btn-icon">💾</span>
+                    Export
+                </button>
+                <button id="clearBtn" class="clear-btn">
+                    <span class="btn-icon">🗑️</span>
+                    Clear
+                </button>
+            </div>
+        </div>
+        
+        <div class="output-section">
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>🎨 Generating your amazing word cloud...</p>
+            </div>
+            
+            <div id="wordCloudContainer" class="word-cloud-container">
+                <canvas id="wordCloudCanvas" width="800" height="600"></canvas>
+                <div id="particleContainer" class="particle-container"></div>
+            </div>
+            
+            <div id="wordStats" class="word-stats hidden">
+                <h3>📊 Word Statistics</h3>
+                <div id="statsContent"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
