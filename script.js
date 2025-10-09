@@ -184,7 +184,7 @@ class AdvancedWordCloudGenerator {
     
     // Advanced collision detection with spatial hashing
     checkCollision(x, y, width, height) {
-        const margin = 5; // Add some padding
+    const margin = 8; // More padding for stricter collision
         
         for (const word of this.placedWords) {
             if (x - margin < word.x + word.width + margin &&
@@ -205,7 +205,7 @@ class AdvancedWordCloudGenerator {
         const height = fontSize;
 
         let x, y;
-        const maxAttempts = 500; // More attempts for denser packing
+    const maxAttempts = 1500; // Even more attempts for denser packing
         let attempts = 0;
         let found = false;
         let best = null;
@@ -273,9 +273,9 @@ class AdvancedWordCloudGenerator {
     getSpiralPosition(attempt, width, height) {
         const centerX = this.canvasWidth / 2;
         const centerY = this.canvasHeight / 2;
-        const angle = attempt * 0.3;
-        const radius = attempt * 2;
-        
+        // Denser spiral
+        const angle = attempt * 0.18;
+        const radius = 2 + attempt * 1.1;
         return {
             x: centerX + Math.cos(angle) * radius - width / 2,
             y: centerY + Math.sin(angle) * radius + height / 2
@@ -377,8 +377,12 @@ class AdvancedWordCloudGenerator {
             for (const [word, frequency] of sortedWords) {
                 const fontSize = this.calculateFontSize(frequency, maxFrequency, minFontSize, maxFontSize);
                 const color = colors[Math.floor(Math.random() * colors.length)];
-                
-                this.placeWord(word, fontSize, color, layout);
+                // Only add if it fits
+                const placed = this.placeWord(word, fontSize, color, layout);
+                if (!placed) {
+                    // If can't place, stop adding more words (prevents overlap at high density)
+                    break;
+                }
             }
             
             this.drawWordCloud();
