@@ -203,11 +203,15 @@ class AdvancedWordCloudGenerator {
         const metrics = this.ctx.measureText(word);
         const width = metrics.width;
         const height = fontSize;
-        
+
         let x, y;
-        const maxAttempts = 100;
+        const maxAttempts = 500; // More attempts for denser packing
         let attempts = 0;
-        
+        let found = false;
+        let best = null;
+        let minDist = Infinity;
+
+        // Try to find the best position (closest to center, no overlap)
         while (attempts < maxAttempts) {
             switch (layout) {
                 case 'spiral':
@@ -220,33 +224,49 @@ class AdvancedWordCloudGenerator {
                     ({ x, y } = this.getCircularPosition(attempts, width, height));
                     break;
                 default: // random
-                    x = Math.random() * (this.canvasWidth - width);
-                    y = Math.random() * (this.canvasHeight - height) + height;
+                    x = Math.random() * (this.canvasWidth - width - 10) + 5;
+                    y = Math.random() * (this.canvasHeight - height - 10) + height + 5;
             }
-            
+            // Keep inside canvas
+            if (x < 0) x = 0;
+            if (y < height) y = height;
+            if (x + width > this.canvasWidth) x = this.canvasWidth - width;
+            if (y > this.canvasHeight) y = this.canvasHeight;
+
             if (!this.checkCollision(x, y - height, width, height)) {
-                const rotation = document.getElementById('rotation').value;
-                const opacity = document.getElementById('opacity').value;
-                
-                this.placedWords.push({
-                    word: word,
-                    x: x,
-                    y: y,
-                    width: width,
-                    height: height,
-                    fontSize: fontSize,
-                    color: color,
-                    rotation: rotation,
-                    opacity: opacity,
-                    originalX: x,
-                    originalY: y,
-                    animationDelay: Math.random() * 1000
-                });
-                return true;
+                // Prefer positions closer to center
+                const centerX = this.canvasWidth / 2;
+                const centerY = this.canvasHeight / 2;
+                const dist = Math.hypot(x + width / 2 - centerX, y - height / 2 - centerY);
+                if (dist < minDist) {
+                    minDist = dist;
+                    best = { x, y };
+                    found = true;
+                }
+                // If very close to center, break early
+                if (dist < 20) break;
             }
             attempts++;
         }
-        
+        if (found && best) {
+            const rotation = document.getElementById('rotation').value;
+            const opacity = document.getElementById('opacity').value;
+            this.placedWords.push({
+                word: word,
+                x: best.x,
+                y: best.y,
+                width: width,
+                height: height,
+                fontSize: fontSize,
+                color: color,
+                rotation: rotation,
+                opacity: opacity,
+                originalX: best.x,
+                originalY: best.y,
+                animationDelay: Math.random() * 1000
+            });
+            return true;
+        }
         return false;
     }
     
