@@ -192,14 +192,14 @@ class AdvancedWordCloudGenerator {
     
     // Advanced collision detection with spatial hashing
     checkCollision(x, y, width, height) {
-    // Use the value from the Word Spacing slider
-    const margin = parseInt(document.getElementById('wordSpacing').value) || 0;
-        
+        const margin = parseInt(document.getElementById('wordSpacing').value) || 0;
         for (const word of this.placedWords) {
-            if (x - margin < word.x + word.width + margin &&
+            if (
+                x - margin < word.x + word.width + margin &&
                 x + width + margin > word.x - margin &&
                 y - margin < word.y + word.height + margin &&
-                y + height + margin > word.y - margin) {
+                y + height + margin > word.y - margin
+            ) {
                 return true;
             }
         }
@@ -210,22 +210,19 @@ class AdvancedWordCloudGenerator {
     placeWord(word, fontSize, color, layout) {
         this.ctx.font = `${fontSize}px ${document.getElementById('fontFamily').value}`;
         const metrics = this.ctx.measureText(word);
-        // Use actual bounding box if available for more accurate collision
         let width = metrics.width;
         let height = fontSize;
         if ('actualBoundingBoxAscent' in metrics && 'actualBoundingBoxDescent' in metrics) {
             height = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
         }
-    // Do not add margin here; margin is only for collision check
 
         let x, y;
-    const maxAttempts = 1500; // Even more attempts for denser packing
+        const maxAttempts = 1500;
         let attempts = 0;
         let found = false;
         let best = null;
         let minDist = Infinity;
 
-        // Try to find the best position (closest to center, no overlap)
         while (attempts < maxAttempts) {
             switch (layout) {
                 case 'spiral':
@@ -237,18 +234,12 @@ class AdvancedWordCloudGenerator {
                 case 'circular':
                     ({ x, y } = this.getCircularPosition(attempts, width, height));
                     break;
-                default: // random
-                    x = Math.random() * (this.canvasWidth - width - 10) + 5;
-                    y = Math.random() * (this.canvasHeight - height - 10) + height + 5;
+                default:
+                    x = Math.random() * (this.canvasWidth - width);
+                    y = Math.random() * (this.canvasHeight - height) + height;
             }
-            // Keep inside canvas
-            if (x < 0) x = 0;
-            if (y < height) y = height;
-            if (x + width > this.canvasWidth) x = this.canvasWidth - width;
-            if (y > this.canvasHeight) y = this.canvasHeight;
 
             if (!this.checkCollision(x, y - height, width, height)) {
-                // Prefer positions closer to center
                 const centerX = this.canvasWidth / 2;
                 const centerY = this.canvasHeight / 2;
                 const dist = Math.hypot(x + width / 2 - centerX, y - height / 2 - centerY);
@@ -257,11 +248,11 @@ class AdvancedWordCloudGenerator {
                     best = { x, y };
                     found = true;
                 }
-                // If very close to center, break early
                 if (dist < 20) break;
             }
             attempts++;
         }
+
         if (found && best) {
             const rotation = document.getElementById('rotation').value;
             const opacity = document.getElementById('opacity').value;
