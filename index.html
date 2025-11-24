@@ -3,165 +3,562 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AAdvanced Word Cloud Generator</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>GlennAdmin - Nesodden Edition</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- CSS RESET & VARIABLES --- */
+        :root {
+            --bg-dark: #000000;
+            --bg-panel: #191c24;
+            --text-primary: #ffffff;
+            --text-secondary: #6c7293;
+            --accent-purple: #b66dff;
+            --accent-cyan: #00d25b;
+            --accent-orange: #ffab00;
+            --accent-red: #fc424a;
+            --sidebar-width: 244px;
+            --nav-height: 70px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-secondary);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--bg-panel);
+            height: 100vh;
+            position: fixed;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #2c2e33;
+        }
+
+        .brand-logo {
+            height: var(--nav-height);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-primary);
+            letter-spacing: 1px;
+        }
+        .brand-logo i { color: var(--accent-purple); margin-right: 10px; }
+
+        .profile-section {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #2c2e33;
+        }
+
+        .profile-pic {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--accent-cyan);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+
+        .profile-info h5 { color: var(--text-primary); font-size: 0.9rem; margin-bottom: 2px;}
+        .profile-info p { font-size: 0.75rem; color: var(--text-secondary); }
+        .online-status { color: var(--accent-cyan); font-size: 0.7rem; margin-left: 5px;}
+
+        .nav-menu {
+            list-style: none;
+            margin-top: 20px;
+        }
+
+        .nav-item {
+            margin-bottom: 5px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .nav-link:hover, .nav-item.active .nav-link {
+            background-color: #0f1015;
+            color: var(--text-primary);
+        }
+
+        .nav-link i {
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+            color: var(--accent-purple); /* Default icon color */
+        }
+
+        .nav-category {
+            padding: 20px 20px 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        /* --- MAIN CONTENT --- */
+        .page-body-wrapper {
+            width: calc(100% - var(--sidebar-width));
+            margin-left: var(--sidebar-width);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar */
+        .navbar {
+            height: var(--nav-height);
+            background-color: var(--bg-panel);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-left { display: flex; align-items: center; gap: 20px; }
+        .hamburger { cursor: pointer; font-size: 1.2rem; }
+        
+        .search-bar {
+            background: transparent;
+            border: 1px solid #2c2e33;
+            padding: 8px 15px;
+            border-radius: 4px;
+            color: var(--text-primary);
+            width: 300px;
+        }
+        .search-bar::placeholder { color: var(--text-secondary); }
+
+        .navbar-right { display: flex; align-items: center; gap: 20px; }
+        .icon-badge { position: relative; cursor: pointer; }
+        .badge-dot {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 8px;
+            height: 8px;
+            background-color: var(--accent-red);
+            border-radius: 50%;
+        }
+
+        /* Content Area */
+        .main-panel {
+            padding: 30px;
+            background-color: var(--bg-dark);
+            min-height: calc(100vh - var(--nav-height));
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .page-title { color: var(--text-primary); font-size: 1.2rem; display: flex; align-items: center; gap: 10px; }
+        .btn-create {
+            background-color: var(--accent-cyan);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* Grid System */
+        .row {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+        
+        .col-8 { flex: 2; }
+        .col-4 { flex: 1; }
+
+        /* Cards */
+        .card {
+            background-color: var(--bg-panel);
+            border-radius: 4px;
+            padding: 25px;
+            box-shadow: 0 1px 20px 0 rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        /* Chart Legend Customization */
+        .chart-legend {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            font-size: 0.8rem;
+            margin-bottom: 10px;
+        }
+        .legend-item { display: flex; align-items: center; gap: 5px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
+
+        /* Donut Info */
+        .donut-info {
+            margin-top: 20px;
+        }
+        .donut-stat {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        .donut-stat i { margin-right: 10px; font-size: 0.6rem; }
+
+        /* Update Section (Images) */
+        .update-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .update-img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 4px;
+            opacity: 0.8;
+            transition: 0.3s;
+        }
+        .update-img:hover { opacity: 1; transform: scale(1.02); }
+
+        /* Calendar Widget */
+        .calendar-widget {
+            background: linear-gradient(to right, #1cd8d2, #93edc7);
+            border-radius: 4px 4px 0 0;
+            padding: 20px;
+            text-align: center;
+            color: #fff;
+        }
+        .calendar-body {
+            background-color: var(--bg-panel);
+            padding: 20px;
+        }
+        .cal-table { width: 100%; text-align: center; color: var(--text-secondary); }
+        .cal-table th { padding-bottom: 15px; font-size: 0.8rem; color: var(--text-primary); }
+        .cal-table td { padding: 10px; font-size: 0.8rem; cursor: pointer; }
+        .cal-table td:hover { color: #fff; }
+        .cal-table .active { background-color: var(--accent-cyan); color: #fff; border-radius: 50%; }
+
+        .btn-upgrade {
+            background-color: var(--accent-orange);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: bold;
+            float: right;
+            margin-top: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (max-width: 1000px) {
+            .row { flex-direction: column; }
+            .sidebar { display: none; }
+            .page-body-wrapper { width: 100%; margin-left: 0; }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Simens wordcloud generator</h1>
-            <p>Create stunning, Yes word clouds with animations, particle effects, and multiple export options!</p>
-        </header>
+
+    <nav class="sidebar">
+        <div class="brand-logo">
+            <i class="fa-solid fa-layer-group"></i> GLENN<span style="color:#fff; font-weight:300;">ADMIN</span>
+        </div>
         
-        <div class="input-section">
-            <div class="input-tabs">
-                <button class="tab-btn active" data-tab="text">📝 Text Input</button>
-                <button class="tab-btn" data-tab="url">🌐 URL Input</button>
-                <button class="tab-btn" data-tab="file">📁 File Upload</button>
+        <div class="profile-section">
+            <div class="profile-pic">G</div>
+            <div class="profile-info">
+                <h5>Glenn</h5>
+                <p>Paternity CEO <span class="online-status"><i class="fa-solid fa-circle"></i></span></p>
             </div>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-category">Main</li>
+            <li class="nav-item active">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-house-chimney"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
             
-            <div id="textTab" class="tab-content active">
-                <textarea 
-                    id="textInput" 
-                    placeholder="Enter your text here... (e.g., 'Machine learning is transforming the world of artificial intelligence. Deep learning algorithms are revolutionizing how we process data and make predictions. Neural networks are becoming more sophisticated every day.')"
-                    rows="6"
-                ></textarea>
+            <li class="nav-category">Paternity Logic</li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-baby-carriage"></i>
+                    <span>Diaper Analytics</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-mug-hot"></i>
+                    <span>Coffee Intake</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-ship"></i>
+                    <span>Nesoddbåten Schedule</span>
+                </a>
+            </li>
+
+            <li class="nav-category">Business Empire</li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    <span>Unicorn Ideas</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-file-contract"></i>
+                    <span>Wife Negotiations</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fa-solid fa-bug"></i>
+                    <span>Code Bugs (400+)</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="page-body-wrapper">
+        
+        <nav class="navbar">
+            <div class="navbar-left">
+                <i class="fa-solid fa-bars hamburger" style="color: #fff;"></i>
+                <input type="text" class="search-bar" placeholder="Search projects or locate pacifier...">
             </div>
-            
-            <div id="urlTab" class="tab-content">
-                <input type="url" id="urlInput" placeholder="Enter URL to extract text from... (e.g., https://example.com/article)">
-                <button id="fetchUrlBtn" class="fetch-btn">🔍 Fetch Text</button>
-                <div id="urlStatus" class="status-message"></div>
+            <div class="navbar-right">
+                <div class="icon-badge">
+                    <i class="fa-regular fa-envelope" style="color: #fff;"></i>
+                    <span class="badge-dot"></span>
+                </div>
+                <div class="icon-badge">
+                    <i class="fa-regular fa-bell" style="color: #fff;"></i>
+                    <span class="badge-dot"></span>
+                </div>
+                <div style="color: #fff; display:flex; align-items:center; gap:10px; font-size:0.9rem;">
+                    <div class="profile-pic" style="width:30px; height:30px; font-size:0.8rem;">G</div>
+                    <span>Glenn (Nesodden)</span>
+                    <i class="fa-solid fa-chevron-down" style="font-size:0.7rem;"></i>
+                </div>
             </div>
+        </nav>
+
+        <div class="main-panel">
             
-            <div id="fileTab" class="tab-content">
-                <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx">
-                <div id="fileStatus" class="status-message"></div>
+            <div class="page-header">
+                <div class="page-title">
+                    <span style="background: linear-gradient(45deg, #b66dff, #8d40e0); padding: 8px; border-radius: 4px; color:white;"><i class="fa-solid fa-house"></i></span>
+                    <h3>Maternity Leave Dashboard</h3>
+                </div>
+                <button class="btn-create">+ New Startup Idea</button>
             </div>
-            
-            <div class="controls">
-                <div class="control-group">
-                    <label for="maxWords">Max Words:</label>
-                    <input type="number" id="maxWords" value="50" min="10" max="200">
-                </div>
-                
-                <div class="control-group">
-                    <label for="minFontSize">Min Font Size:</label>
-                    <input type="number" id="minFontSize" value="12" min="8" max="50">
-                </div>
-                
-                <div class="control-group">
-                    <label for="maxFontSize">Max Font Size:</label>
-                    <input type="number" id="maxFontSize" value="60" min="20" max="120">
-                </div>
-                
-                <div class="control-group">
-                    <label for="colorScheme">Color Scheme:</label>
-                    <select id="colorScheme">
-                        <option value="rainbow">🌈 Rainbow</option>
-                        <option value="blue">💙 Blue Tones</option>
-                        <option value="green">💚 Green Tones</option>
-                        <option value="red">❤️ Red Tones</option>
-                        <option value="purple">💜 Purple Tones</option>
-                        <option value="orange">🧡 Orange Tones</option>
-                        <option value="neon">⚡ Neon Glow</option>
-                        <option value="gradient">🎨 Gradient</option>
-                        <option value="monochrome">⚫ Monochrome</option>
-                    </select>
-                </div>
-                
-                <div class="control-group">
-                    <label for="layout">Layout:</label>
-                    <select id="layout">
-                        <option value="spiral">🌀 Spiral</option>
-                        <option value="grid">📐 Grid</option>
-                        <option value="random">🎲 Random</option>
-                        <option value="circular">⭕ Circular</option>
-                    </select>
-                </div>
-                
-                <div class="control-group">
-                    <label for="animation">Animation:</label>
-                    <select id="animation">
-                        <option value="none">🚫 None</option>
-                        <option value="fade">✨ Fade In</option>
-                        <option value="bounce">🎾 Bounce</option>
-                        <option value="spiral">🌀 Spiral In</option>
-                        <option value="particles">✨ Particle Effect</option>
-                    </select>
-                </div>
-                
-                <div class="control-group">
-                    <label for="fontFamily">Font Family:</label>
-                    <select id="fontFamily">
-                        <option value="Arial">Arial</option>
-                        <option value="Helvetica">Helvetica</option>
-                        <option value="Times New Roman">Times New Roman</option>
-                        <option value="Georgia">Georgia</option>
-                        <option value="Verdana">Verdana</option>
-                        <option value="Impact">Impact</option>
-                        <option value="Comic Sans MS">Comic Sans MS</option>
-                    </select>
-                </div>
-                
-                <div class="control-group">
-                    <label for="rotation">Word Rotation:</label>
-                    <input type="range" id="rotation" min="0" max="90" value="0">
-                    <span id="rotationValue">0°</span>
+
+            <div class="row">
+                <div class="col-8 card">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h4 class="card-title">Productivity vs. Baby Needs</h4>
+                        <div class="chart-legend">
+                            <div class="legend-item"><span class="dot" style="background:#b66dff"></span> Code Written</div>
+                            <div class="legend-item"><span class="dot" style="background:#00d25b"></span> Diapers</div>
+                            <div class="legend-item"><span class="dot" style="background:#ffab00"></span> Crying</div>
+                        </div>
+                    </div>
+                    <div style="height: 300px;">
+                        <canvas id="barChart"></canvas>
+                    </div>
                 </div>
 
-                <div class="control-group">
-                    <label for="wordSpacing">Word Spacing:</label>
-                    <input type="range" id="wordSpacing" min="0" max="40" value="10">
-                    <span id="wordSpacingValue">10px</span>
+                <div class="col-4 card">
+                    <h4 class="card-title">Distraction Sources</h4>
+                    <div style="height: 200px; display: flex; justify-content: center;">
+                        <canvas id="donutChart"></canvas>
+                    </div>
+                    <div class="donut-info">
+                        <div class="donut-stat"><i class="fa-solid fa-circle" style="color: #36a2eb"></i> Searching "How to Sleep" (30%)</div>
+                        <div class="donut-stat"><i class="fa-solid fa-circle" style="color: #ff6384"></i> Staring at Fjord (30%)</div>
+                        <div class="donut-stat"><i class="fa-solid fa-circle" style="color: #4bc0c0"></i> Actual Coding (40%)</div>
+                    </div>
                 </div>
-                
-                <div class="control-group">
-                    <label for="opacity">Opacity:</label>
-                    <input type="range" id="opacity" min="0.3" max="1" step="0.1" value="1">
-                    <span id="opacityValue">100%</span>
+            </div>
+
+            <div class="row">
+                <div class="col-8 card">
+                    <div style="display:flex; justify-content:space-between;">
+                        <h4 class="card-title">Recent Updates from Nesodden</h4>
+                    </div>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 15px;">
+                        <i class="fa-solid fa-user"></i> Glenn Menqu <i class="fa-solid fa-clock" style="margin-left:10px;"></i> October 3rd, 2025
+                    </p>
+                    
+                    <div class="update-grid">
+                        <img src="https://images.unsplash.com/photo-1522199755839-a2bacb67c546?q=80&w=400&auto=format&fit=crop" class="update-img" alt="Work">
+                        <img src="https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=400&auto=format&fit=crop" class="update-img" alt="Snow">
+                        <img src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=400&auto=format&fit=crop" class="update-img" alt="Office">
+                    </div>
+                    
+                    <p style="margin-top: 15px; line-height: 1.5;">
+                        Managed to write 3 lines of code before the baby woke up. The ferry ride was peaceful, bought an overpriced coffee. 
+                        Thinking of pivoting the SaaS idea to "Uber for Pacifiers".
+                    </p>
+                </div>
+
+                <div class="col-4">
+                    <div class="card" style="padding: 0; overflow: hidden;">
+                        <div class="calendar-widget">
+                            <div style="display:flex; justify-content:space-between; padding: 0 10px;">
+                                <i class="fa-solid fa-chevron-left"></i>
+                                <h3>November 2025</h3>
+                                <i class="fa-solid fa-chevron-right"></i>
+                            </div>
+                        </div>
+                        <div class="calendar-body">
+                            <table class="cal-table">
+                                <thead>
+                                    <tr>
+                                        <th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td>31</td><td>1</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td>
+                                    </tr>
+                                    <tr>
+                                        <td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td>
+                                    </tr>
+                                    <tr>
+                                        <td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td>
+                                    </tr>
+                                    <tr>
+                                        <td>23</td><td>24</td><td>25</td><td>26</td><td class="active">27</td><td>28</td><td>29</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <button class="btn-upgrade"><i class="fa-solid fa-crown"></i> Extend Leave</button>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="action-buttons">
-                <button id="generateBtn" class="generate-btn">
-                    <span class="btn-icon">✨</span>
-                    Generate Word Cloud
-                </button>
-                <button id="animateBtn" class="animate-btn">
-                    <span class="btn-icon">🎬</span>
-                    Animate
-                </button>
-                <button id="exportBtn" class="export-btn">
-                    <span class="btn-icon">💾</span>
-                    Export
-                </button>
-                <button id="clearBtn" class="clear-btn">
-                    <span class="btn-icon">🗑️</span>
-                    Clear
-                </button>
-            </div>
-        </div>
-        
-        <div class="output-section">
-            <div id="loading" class="loading hidden">
-                <div class="spinner"></div>
-                <p>🎨 Generating your amazing word cloud...</p>
-            </div>
-            
-            <div id="wordCloudContainer" class="word-cloud-container">
-                <canvas id="wordCloudCanvas" width="800" height="600"></canvas>
-                <div id="particleContainer" class="particle-container"></div>
-            </div>
-            
-            <div id="wordStats" class="word-stats hidden">
-                <h3>📊 Word Statistics</h3>
-                <div id="statsContent"></div>
-            </div>
+
         </div>
     </div>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="script.js"></script>
+
+    <script>
+        // Bar Chart
+        const ctxBar = document.getElementById('barChart').getContext('2d');
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG'],
+                datasets: [
+                    {
+                        label: 'Code Written',
+                        data: [10, 20, 15, 25, 30, 45, 40, 50],
+                        backgroundColor: '#b66dff',
+                        barThickness: 6,
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Diapers',
+                        data: [50, 45, 40, 35, 30, 25, 20, 15],
+                        backgroundColor: '#00d25b',
+                        barThickness: 6,
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Crying',
+                        data: [40, 35, 30, 40, 25, 10, 5, 45], // Regression in August due to teething
+                        backgroundColor: '#ffab00',
+                        barThickness: 6,
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false } // Custom legend in HTML
+                },
+                scales: {
+                    y: {
+                        grid: { color: '#2c2e33', drawBorder: false },
+                        ticks: { color: '#6c7293', display: false }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#6c7293' }
+                    }
+                }
+            }
+        });
+
+        // Donut Chart
+        const ctxDonut = document.getElementById('donutChart').getContext('2d');
+        new Chart(ctxDonut, {
+            type: 'doughnut',
+            data: {
+                labels: ['Searching Sleep', 'Staring at Fjord', 'Actual Coding'],
+                datasets: [{
+                    data: [30, 30, 40],
+                    backgroundColor: ['#36a2eb', '#ff6384', '#4bc0c0'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                cutout: '70%',
+                plugins: {
+                    legend: { display: false }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
