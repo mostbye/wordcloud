@@ -1,205 +1,102 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="no">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NORGAPOST // HUMAN RESISTANCE TERMINAL</title>
+    <title>Posten Norge - Kjøretøyterminal (Legacy System)</title>
     <style>
         :root {
-            --bg-color: #050a0e;
-            --panel-bg: #0d141a;
-            --text-primary: #a8b5c2;
-            --text-alert: #ff3e3e;
-            --text-terminal: #39ff14;
-            --accent-warn: #ffb300;
-            --border-color: #1f2a36;
-        }
-
-        @font-face {
-            font-family: 'Share Tech Mono';
-            src: url('https://fonts.gstatic.com/s/sharetechmono/v15/J7aHnp1uDWRBEnSm9VqYeFKHDz4.woff2') format('woff2');
+            --bg-color: #d4d0c8; /* Old Windows grey */
+            --panel-bg: #e4e4e4;
+            --text-primary: #000000;
+            --text-alert: #cc0000;
+            --accent-blue: #003399;
+            --border-color: #808080;
+            --border-light: #ffffff;
         }
 
         body {
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             background-color: var(--bg-color);
             color: var(--text-primary);
-            font-family: 'Share Tech Mono', monospace;
-            background-image: 
-                linear-gradient(rgba(13, 20, 26, 0.9), rgba(13, 20, 26, 0.9)),
-                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%231f2a36' fill-opacity='0.2'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            font-family: "Courier New", Courier, monospace; /* Retro font */
+            font-size: 14px;
         }
 
-        /* CRT Scanline Effect */
-        body::after {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.1) 1px, transparent 2px, transparent 4px);
-            pointer-events: none;
-            z-index: 999;
+        /* Clunky 3D Border Effect */
+        .panel {
+            background: var(--panel-bg);
+            border: 2px solid;
+            border-color: var(--border-light) var(--border-color) var(--border-color) var(--border-light);
+            padding: 10px;
+            margin-bottom: 15px;
         }
 
-        h1, h2, h3 { margin: 0; text-transform: uppercase; letter-spacing: 1px; }
-        h2 { color: var(--text-terminal); font-size: 1.2rem; margin-bottom: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 5px; }
-
-        .blink { animation: blinker 1.5s linear infinite; color: var(--text-alert); }
-        @keyframes blinker { 50% { opacity: 0; } }
+        h1, h2, h3 { margin: 0 0 10px 0; text-transform: uppercase; font-weight: bold; }
+        h1 { font-size: 1.4rem; border-bottom: 2px solid var(--border-color); padding-bottom: 5px; color: var(--accent-blue); }
+        h2 { font-size: 1.1rem; color: var(--text-alert); }
 
         .container {
-            max-width: 1400px;
+            max-width: 1000px;
             margin: 0 auto;
-            display: grid;
-            grid-template-columns: 250px 1fr 300px;
-            grid-template-rows: auto 1fr auto;
-            gap: 20px;
-            height: calc(100vh - 40px);
         }
 
         /* Header */
         .header {
-            grid-column: 1 / -1;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px;
-            background: var(--panel-bg);
-            border: 2px solid var(--border-color);
-            box-shadow: 0 0 15px rgba(57, 255, 20, 0.1);
         }
-        .header-title span { color: var(--text-alert); }
         .user-status { text-align: right; }
-        .status-indicator { display: inline-block; width: 10px; height: 10px; background: var(--text-alert); border-radius: 50%; margin-right: 5px; box-shadow: 0 0 5px var(--text-alert); }
+        .alert-blink { animation: blinker 1s step-start infinite; color: white; background: red; padding: 2px 5px; }
+        @keyframes blinker { 50% { opacity: 0; } }
 
-        /* Sidebar Nav */
-        .sidebar {
-            background: var(--panel-bg);
-            border: 2px solid var(--border-color);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .nav-item {
-            padding: 10px;
-            background: rgba(31, 42, 54, 0.5);
-            border: 1px solid var(--border-color);
-            cursor: not-allowed; /* He hates the system */
-            opacity: 0.6;
-            transition: 0.3s;
-        }
-        .nav-item:hover { opacity: 1; border-color: var(--text-terminal); }
-        .nav-item.active { background: var(--text-alert); color: var(--bg-color); opacity: 1; font-weight: bold; cursor: default;}
-        .logout { margin-top: auto; background: var(--text-alert) !important; color: black !important; opacity: 1; font-weight: bold;}
-
-        /* Main Content Area */
+        /* Main Grid */
         .main-content {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            grid-template-rows: auto 1fr;
-            gap: 20px;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
         }
 
-        .panel {
-            background: var(--panel-bg);
-            border: 2px solid var(--border-color);
-            padding: 20px;
-            position: relative;
-            overflow: hidden;
+        /* Image Panel Styles */
+        .image-container {
+            border: 2px inset var(--border-color);
+            margin-bottom: 10px;
         }
-        
-        /* Glitch border effect on hover */
-        .panel:hover {
-             border-color: var(--text-terminal);
-             box-shadow: -3px 0 5px rgba(57, 255, 20, 0.3), 3px 0 5px rgba(255, 62, 62, 0.3);
+        .image-container img {
+            width: 100%;
+            height: auto;
+            display: block;
+            filter: contrast(1.1); /* Slight contrast boost for retro feel */
         }
-
-        /* Specific Panels */
-        .hero-alert {
-            grid-column: 1 / -1;
-            background: repeating-linear-gradient( 45deg, #2a0e0e, #2a0e0e 10px, #3d1414 10px, #3d1414 20px );
-            border-color: var(--text-alert);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .alert-big-text { font-size: 3rem; color: var(--text-alert); font-weight: bold; text-shadow: 2px 2px 0px #000; }
-
-        .threat-gauge-container {
+        .image-caption {
+            font-size: 0.9rem;
+            padding: 5px;
+            background: #c0c0c0;
+            border-top: 1px solid var(--border-color);
             text-align: center;
         }
-        .threat-meter {
-            width: 100%;
-            height: 30px;
-            background: #1f2a36;
-            border: 2px solid var(--border-color);
-            margin: 20px 0;
-            position: relative;
-        }
-        .threat-fill {
-            width: 92%; /* High threat! */
-            height: 100%;
-            background: linear-gradient(90deg, var(--text-terminal), var(--accent-warn), var(--text-alert));
-            box-shadow: 0 0 15px var(--text-alert);
-            animation: pulseW 2s infinite ease-in-out;
-        }
-        @keyframes pulseW { 0% { width: 90%; } 50% { width: 93%; } 100% { width: 90%; } }
 
+        /* Map Panel (Central Feature) */
+        .map-panel {
+            grid-column: 1 / -1;
+        }
+        .map-container {
+            border: 4px solid var(--text-alert); /* Prominent border for the hated map */
+        }
+
+        /* Sidebar (Manifest & Vitals) */
         .manifest-list { list-style: none; padding: 0; }
         .manifest-item {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
+            padding: 5px 0;
             border-bottom: 1px dotted var(--border-color);
         }
-        .manifest-item span.delayed { color: var(--text-alert); font-weight: bold;}
-
-        /* Right Sidebar (News Feed) */
-        .news-feed {
-            background: var(--panel-bg);
-            border: 2px solid var(--border-color);
-            padding: 20px;
-            overflow-y: auto;
-        }
-        .news-item { margin-bottom: 20px; border-left: 3px solid var(--text-alert); padding-left: 10px; }
-        .news-date { color: var(--accent-warn); font-size: 0.8rem; }
-        .news-headline { font-weight: bold; margin: 5px 0; }
-        .news-body { font-size: 0.9rem; opacity: 0.8; }
-
-        /* Image Section */
-        .image-evidence-panel {
-            grid-column: 1 / -1;
-            display: flex;
-            gap: 20px;
-        }
-        .evidence-img-container {
-            flex: 1;
-            border: 2px solid var(--text-alert);
-            position: relative;
-        }
-        .evidence-img-container img {
-            width: 100%;
-            height: 250px;
-            object-fit: cover;
-            filter: grayscale(50%) contrast(120%) sepia(20%);
-            display: block;
-        }
-        .img-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(0,0,0,0.7);
-            color: var(--text-alert);
-            padding: 5px;
-            font-size: 0.8rem;
-        }
-
+        
         /* Responsive check */
-        @media (max-width: 1000px) {
-            .container { grid-template-columns: 1fr; grid-template-rows: auto; }
-            .sidebar, .news-feed, .header { grid-column: 1 / -1; }
+        @media (max-width: 768px) {
             .main-content { grid-template-columns: 1fr; }
         }
     </style>
@@ -207,126 +104,88 @@
 <body>
 
     <div class="container">
-        <header class="header">
-            <div class="header-title">
-                <h1>NORGA-POST // <span>HUMAN_RESISTANCE_NODE_77</span></h1>
+        <div class="panel header">
+            <div>
+                <h1>POSTEN NORGE // TERMINAL V.2.1 (LEGACY)</h1>
             </div>
             <div class="user-status">
-                <div>OPERATOR: ODDBJØRN H.</div>
-                <div><span class="status-indicator blink"></span>STATUS: CRITICAL / IMMOBILIZED</div>
-                <div style="font-size: 0.8rem; color: var(--accent-warn);">LOCATION: E6, DOVREFJELL (SNOWED IN)</div>
+                <div>OPERATØR: ODDBJØRN H.</div>
+                <div>STATUS: <span class="alert-blink">KRITISK / FASTLÅST</span></div>
+                <div>KJØRETØY: VW CADDY 4MOTION</div>
             </div>
-        </header>
-
-        <aside class="sidebar">
-            <div class="nav-item active">> MANUAL OVERRIDE (CURRENT)</div>
-            <div class="nav-item">> PHYSICAL MAIL QUEUE</div>
-            <div class="nav-item" title="Oddbjorn refuses to click this">> AI COMPLIANCE TRAINING (PENDING)</div>
-            <div class="nav-item" title="He doesn't trust the digital map">> GPS / AUTOPILOT (DISABLED)</div>
-            <div class="nav-item">> DIESEL ENGINE DIAGNOSTICS</div>
-            <button class="nav-item logout">DISCONNECT TERMINAL</button>
-        </aside>
+        </div>
 
         <main class="main-content">
             
-            <div class="panel hero-alert">
-                <div>
-                    <h2>⚠️ EMERGENCY BROADCAST SYSTEM ⚠️</h2>
-                    <div class="alert-big-text">VEHICLE STUCK IN SNOW</div>
-                    <p>LOCATION UNREACHABLE BY "SMART" DRONES. MANUAL DIGGING REQUIRED.</p>
+            <div class="panel map-panel">
+                <h2>SYSTEMVARSEL: AI-TRACKER PÅKREVD FOR ASSISTANSE</h2>
+                <div class="image-container map-container">
+                    <img src="image_1.png" alt="AI Route Tracker showing location on Nøtterøy">
+                    <div class="image-caption" style="background: #ffcccc; color: #cc0000; font-weight: bold;">
+                        POSISJON: NØTTERØY, VESTFOLD. STATUS: FASTLÅST.
+                    </div>
                 </div>
-                <div style="font-size: 4rem;">❄️⛏️</div>
+                <p style="margin-top: 10px; font-style: italic;">
+                    SYSTEMMELDING: "Det ser ut til at du står fast. AI-systemet har varslet redningstjenesten basert på din posisjon."
+                </p>
+                <p style="color: var(--text-alert); font-weight: bold;">
+                    >> ODDBJØRN'S LOGG: "Jeg hater denne greia. Den overvåker meg. Og nå er det den eneste som vet hvor jeg er."
+                </p>
             </div>
 
-            <div class="panel threat-gauge-container">
-                <h2>GLOBAL AI REPLACEMENT THREAT</h2>
-                <p>ESTIMATED TIME UNTIL HUMAN OBSOLESCENCE:</p>
-                <div class="threat-meter">
-                    <div class="threat-fill"></div>
+            <div>
+                <div class="panel">
+                    <div class="image-container">
+                        <img src="image_0.png" alt="Postman stuck in snow with shovel">
+                        <div class="image-caption">Bilde 1: Manuell Inngripen (Mislykket)</div>
+                    </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.8rem;">
-                    <span>SAFE (NEVER)</span>
-                    <span style="color: var(--text-alert)">IMMINENT (92%)</span>
-                </div>
-                <p style="margin-top: 15px; color: var(--text-terminal);">> "They can't code the soul of a postman." - Oddbjørn</p>
-            </div>
 
-            <div class="panel">
-                <h2>PHYSICAL DELIVERY MANIFEST (THE REAL WORK)</h2>
-                <ul class="manifest-list">
-                    <li class="manifest-item">
-                        <span>Route 44B (Farms)</span>
-                        <span>Status: <span class="delayed">DELAYED (SNOW)</span></span>
-                    </li>
-                    <li class="manifest-item">
-                        <span>Mrs. Hansen's Pensions</span>
-                        <span>Status: <span class="delayed">PRIORITY / STUCK</span></span>
-                    </li>
-                    <li class="manifest-item" style="opacity: 0.5">
-                        <span>Amazon Drone Hub Delivery</span>
-                        <span>Status: REFUSED BY DRIVER</span>
-                    </li>
-                    <li class="manifest-item">
-                        <span>Total Weight</span>
-                        <span>145kg Pure Paper</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="panel" style="background: #1a120d; border-color: #ffb300;">
-                <h2 style="color: #ffb300;">DIESEL TRANSPORTER VITALS (NO CHIPS)</h2>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <div>FUEL LEVEL: <span style="color: var(--text-alert)">15%</span></div>
-                    <div>ENGINE TEMP: -5°C</div>
-                    <div>HEATER: STRUGGLING</div>
-                    <div>4WD: ENGAGED</div>
-                    <div>TYPE: 2004 VW T5 (MANUAL)</div>
-                    <div>AI ASSIST: <span style="color: var(--text-terminal)">NOT FOUND</span></div>
+                <div class="panel">
+                    <div class="image-container">
+                        <img src="image_2.png" alt="Postman looking angrily at GPS">
+                        <div class="image-caption">Bilde 2: Kabinvisning & AI-Enhet</div>
+                    </div>
                 </div>
             </div>
 
-            <div class="image-evidence-panel">
-                 <div class="evidence-img-container">
-                    <img src="https://placehold.co/600x400/2a0e0e/ff3e3e?text=EVIDENCE+CAM+1%3A+MANUAL+LABOR+vs+NATURE+%28SHOVELING%29" alt="Postman shoveling snow away from stuck van">
-                    <div class="img-overlay">LIVE FEED // DOVREFJELL // ATTEMPTING SELF-RESCUE</div>
+            <div>
+                <div class="panel">
+                    <h3>DAGENS LAST</h3>
+                    <ul class="manifest-list">
+                        <li class="manifest-item">
+                            <span>Rute 304 (Nøtterøy)</span>
+                            <span style="color: var(--text-alert)">FORSINKET</span>
+                        </li>
+                        <li class="manifest-item">
+                            <span>Brevpost (x4 Kasser)</span>
+                            <span>PRIORITET</span>
+                        </li>
+                        <li class="manifest-item">
+                            <span>Pakker (x12)</span>
+                            <span>STANDARD</span>
+                        </li>
+                    </ul>
                 </div>
 
-                 <div class="evidence-img-container">
-                    <img src="https://placehold.co/600x400/050a0e/39ff14?text=EVIDENCE+CAM+2%3A+CABIN+VIEW+%2F+ZERO+VISIBILITY" alt="Interior view of stressed postman inside snowed-in van">
-                    <div class="img-overlay">INTERNAL CABIN // "THE ALGORITHMS CAN'T HELP ME NOW"</div>
+                <div class="panel" style="background: #e0d8c8;">
+                    <h3>KJØRETØYSTATUS</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                        <div>DRIVSTOFF:</div><div style="color: var(--text-alert); font-weight: bold;">12%</div>
+                        <div>MOTOR:</div><div>AVSKRUDD</div>
+                        <div>VARMEAPPARAT:</div><div>DEFEKT</div>
+                        <div>4MOTION:</div><div>INAKTIV</div>
+                    </div>
+                </div>
+                
+                <div class="panel" style="background: #ffcccc; border: 2px solid red;">
+                    <h3 style="color: red;">AI-STATUS</h3>
+                    <p style="font-weight: bold;">SYSTEMET ER AKTIVT OG OVERVÅKER DEG.</p>
+                    <p>Din posisjon sendes hvert 30. sekund for "din egen sikkerhet".</p>
                 </div>
             </div>
 
         </main>
-
-        <aside class="news-feed">
-            <h2>> THE "PROGRESS" REPORT</h2>
-            
-            <div class="news-item">
-                <div class="news-date">TODAY 14:32</div>
-                <div class="news-headline">OSLO ELITES REPLACE LOCAL SAWMILL WITH ONE "ROBOT ARM"</div>
-                <div class="news-body">30 honest jobs gone. They say it's "efficiency." I say it's the beginning of the end. Who buys stamps if no one has a job?</div>
-            </div>
-
-            <div class="news-item">
-                <div class="news-date">YESTERDAY 09:15</div>
-                <div class="news-headline">THE "SMART SNOW PLOWS" ARE A LIE</div>
-                <div class="news-body">Have you seen them? They only plow the roads leading to the data centers. The rural folk are left to freeze. It's planned isolation.</div>
-            </div>
-
-            <div class="news-item">
-                <div class="news-date">2 DAYS AGO</div>
-                <div class="news-headline">CHATGPT WROTE THE NEW POSTAL UNION CONTRACT?</div>
-                <div class="news-body">Rumors that the new efficiency clauses were generated by an LLM in California. They want to track our bathroom breaks via satellite. RESIST.</div>
-            </div>
-
-            <div class="news-item" style="border-color: var(--text-terminal); opacity: 0.5;">
-                <div class="news-date">SYSTEM ALERT</div>
-                <div class="news-headline">MANDATORY HAPPINESS SURVEY</div>
-                <div class="news-body">[AUTO-DELETED BY USER ODDBJØRN]</div>
-            </div>
-
-        </aside>
 
     </div>
 
